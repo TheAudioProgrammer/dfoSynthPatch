@@ -22,12 +22,12 @@ void mfccAnalysis::setupMFCC(int sampleRate, int fftSize)
 
 //=============================================================
 
-void mfccAnalysis::analyzeMFCC (double inputWave, int fftSize)
+void mfccAnalysis::analyzeMFCC (double inputWave, int fftSize, std::vector <float> &targetMFCC, bool &flyAnalyzed)
 {
     double wave = inputWave;
     
     //get fft
-    if (mfft.process(wave) && ! isAnalyzed) {
+    if (mfft.process(wave) && ! flyAnalyzed) {
         
         mfft.magsToDB();
         oct.calculate(mfft.magnitudesDB);
@@ -47,17 +47,25 @@ void mfccAnalysis::analyzeMFCC (double inputWave, int fftSize)
         peakFreq = (float)maxBin/fftSize * 44100;
         
         mfcc.mfcc(mfft.magnitudes, mfccs);
-        //cout << mfft.spectralFlatness() << ", " << mfft.spectralCentroid() << endl;
+        
         
         //cout coefficients
-        cout << "\nMFCCS: ";
+        //cout << "\nMFCCS: ";
         for(int i=0; i < 13; i++) {
-            float height = mfccs[i] * 100.0;
-            cout << mfccs[i] << ",";
             
-            //file is now analyzed, don't analyze again
-            isAnalyzed = true;
+            targetMFCC.push_back(mfccs[i]);
+            //cout << mfccs[i] << ",";
         }
+        
+        
+//        for (int i = 0; i < targetMFCC.size(); i++)
+//        {
+//            std::cout << endl << "Target " << targetMFCC[i] << std::endl;
+//        }
+        
+        
+        //file is now analyzed, don't analyze again
+        flyAnalyzed = true;
     }
 
 }

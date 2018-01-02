@@ -17,7 +17,7 @@ class mfccAnalysis
 {
 public:
     void setupMFCC(int sampleRate, int fftSize);
-    void analyzeMFCC (double inputWave, int fftSize);
+    void analyzeMFCC (double inputWave, int fftSize, std::vector <float> &targetMFCC, bool &flyAnalyzed);
     
 
 

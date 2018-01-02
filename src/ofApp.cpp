@@ -42,81 +42,67 @@ void ofApp::setup(){
     memset(lAudioIn, 0, initialBufferSize * sizeof(float));
     memset(rAudioIn, 0, initialBufferSize * sizeof(float));
     
+    //variable initialization
     fftSize = 1024;
-    
+    iterations = 50;
+    popSize = 15;
+    numParams = 6;
+    thresh = 0.8f;
+    targetTrigger = 0;
+    fittestTrigger = 0;
+    targetAnalyzed = false;
+
     //setup MFCC
     mfccAnalyzer.setupMFCC(sampleRate, fftSize);
     
     ofxMaxiSettings::setup(sampleRate, 2, initialBufferSize);
     ofSoundStreamSetup(2,2, this, sampleRate, initialBufferSize, 4);/* Call this last ! */
     
-    
-    iterations = 50;
-    popSize = 50;
-    numParams = 6;
-    thresh = 0.6f;
-    
     //initialize target sound
     for (int i = 0; i < numParams; i++)
     {
-        targetSound.push_back (ofRandom (0.0, 1.0));
+        targetParams.push_back (ofRandom (0.0, 1.0));
     }
+    
+    //get target MFCC we want to get to
+    mySynth.getTargetMFCC(mySynth, mfccAnalyzer, fftSize, targetParams, targetMFCC);
+    
     
     //setup DFO
-    myDFO.setupDFO(popSize, iterations, targetSound, 0.0, 1.0);
+    myDFO.setupDFO(popSize, iterations, targetMFCC, 0.0, 1.0);
     
     //initialize flies into population
-    myDFO.initializeFlies(population);
+    myDFO.initializeFlies(population, numParams, popSize);
     
     //check flies are ok
-    //myDFO.checkFlies(population);
+    //myDFO.checkFlies(population, numParams);
     
-    //calculate initial distance
-    myDFO.calculateFitness(population, fitness);
+    //get initial fly MFCCs
+    mySynth.getFlyMFCC(mySynth, mfccAnalyzer, popSize, fftSize, population, totalFlyMFCC);
     
-    //put target sound params in synth
-    freq1NormalizedT = targetSound[0];
-    freq2NormalizedT = targetSound[1];
-    modFreqNormalizedT = targetSound[2];
-    modDepthNormalizedT = targetSound[3];
-    filterFreqNormalizedT = targetSound[4];
-    filterResNormalizedT = targetSound[5];
+    //calculate how far fly MFCC is from target MFCC
+    //myDFO.calculateFitness(totalFlyMFCC, targetMFCC, fitness);
+    
+    fittestFly = myDFO.findSolution(0.1, totalFlyMFCC, targetMFCC, fitness, bestResult);
+    //mySynth.checkTarget(targetMFCC);
     
     
-    //re-map to synth
-    freq1T = ofMap(freq1NormalizedT, 0, 1, 100, 1000);
-    freq2T = ofMap(freq2NormalizedT, 0, 1, 100, 1000);
-    modFreqT = ofMap(modFreqNormalizedT, 0, 1, 100, 1000);
-    modDepthT = ofMap(modDepthNormalizedT, 0, 1, 100, 1000);
-    filterFreqT = ofMap(filterFreqNormalizedT, 0, 1, 100, 500);
-    filterResT = ofMap(filterResNormalizedT, 0, 1, 0.0, 1.0);
+    //re-map parameters from above to synth
+    targetFreq1 = ofMap(targetParams[0], 0, 1, 100, 1000);
+    targetFreq2 = ofMap(targetParams[1], 0, 1, 100, 1000);
+    targetModFreq = ofMap(targetParams[2], 0, 1, 100, 1000);
+    targetModDepth = ofMap(targetParams[3], 0, 1, 100, 1000);
+    targetFilterFreq = ofMap(targetParams[4], 0, 1, 100, 500);
+    targetFilterRes = ofMap(targetParams[5], 0, 1, 0.0, 1.0);
     
-    for (int i = 0; i < iterations; i++)
-    {
-        myDFO.findSolution(thresh, population, fitness, bestResult);
-    }
+    fittestFreq1 = ofMap(population[fittestFly][0], 0, 1, 100, 1000);
+    fittestFreq2 = ofMap(population[fittestFly][1], 0, 1, 100, 1000);
+    fittestModFreq = ofMap(population[fittestFly][2], 0, 1, 100, 1000);
+    fittestModDepth = ofMap(population[fittestFly][3], 0, 1, 100, 1000);
+    fittestFilterFreq = ofMap(population[fittestFly][4], 0, 1, 100, 500);
+    fittestFilterRes = ofMap(population[fittestFly][5], 0, 1, 0.0, 1.0);
     
-    for (int i = 0; i < numParams; i++)
-    {
-        std::cout << targetSound[i] << std::endl;
-    }
-    
-    //put target sound params in synth
-    freq1NormalizedR = bestResult[0];
-    freq2NormalizedR = bestResult[1];
-    modFreqNormalizedR = bestResult[2];
-    modDepthNormalizedR = bestResult[3];
-    filterFreqNormalizedR = bestResult[4];
-    filterResNormalizedR = bestResult[5];
-    
-    
-    //re-map to synth
-    freq1R = ofMap(freq1NormalizedR, 0, 1, 100, 1000);
-    freq2R = ofMap(freq2NormalizedR, 0, 1, 100, 1000);
-    modFreqR = ofMap(modFreqNormalizedR, 0, 1, 100, 1000);
-    modDepthR = ofMap(modDepthNormalizedR, 0, 1, 100, 1000);
-    filterFreqR = ofMap(filterFreqNormalizedR, 0, 1, 100, 500);
-    filterResR = ofMap(filterResNormalizedR, 0, 1, 0.0, 1.0);
+    std::cout << "READY TO PLAY" << std::endl;
 }
 
 //--------------------------------------------------------------
@@ -129,30 +115,32 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    
-    
-    
+
 }
 
 //--------------------------------------------------------------
 void ofApp::audioRequested 	(float * output, int bufferSize, int nChannels){
     
+    
+    
+    
     for (int i = 0; i < bufferSize; i++){
         
-        double envOutTarget = mySynth.playSynth(freq1T, freq2T, modFreqT, modDepthT, filterFreqT, filterResT, triggerT);
+        double targetEnvOut = mySynth.playSynth(targetFreq1, targetFreq2, targetModFreq, targetModDepth, targetFilterFreq, targetFilterRes, targetTrigger);
         
         
-        double envOutResult = mySynth.playSynth(freq1R, freq2R, modFreqR, modDepthR, filterFreqR, filterResR, triggerR);
+        double fittestEnvOut = mySynth2.playSynth(fittestFreq1, fittestFreq2, fittestModFreq, fittestModDepth, fittestFilterFreq, fittestFilterRes, fittestTrigger);
         
-        if (triggerT == 1)
+        
+        if (targetTrigger == 1)
         {
             //filter to output
-            mymix.stereo(envOutTarget, outputs, 0.8);
+            mymix.stereo(targetEnvOut, outputs, 0.8);
         }
         
-        if (triggerR == 1)
+        if (fittestTrigger == 1)
         {
-            mymix2.stereo(envOutResult, outputs, 0.8);
+            mymix2.stereo(fittestEnvOut, outputs, 0.8);
         }
         
         //output to speakers
@@ -169,15 +157,14 @@ void ofApp::audioReceived 	(float * input, int bufferSize, int nChannels){
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     
-    //play sample using space bar
     if (key == 116)
     {
-        triggerT = 1;
+        targetTrigger = 1;
     }
     
     if (key == 114)
     {
-        triggerR = 1;
+        fittestTrigger = 1;
     }
 }
 
@@ -187,13 +174,14 @@ void ofApp::keyReleased(int key){
     //play sample using space bar
     if (key == 116)
     {
-        triggerT = 0;
+        targetTrigger = 0;
     }
     
     if (key == 114)
     {
-        triggerR = 0;
+        fittestTrigger = 0;
     }
+
 
     
 }

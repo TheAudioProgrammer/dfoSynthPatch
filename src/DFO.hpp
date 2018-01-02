@@ -18,19 +18,20 @@ class DFO
 public:
     void setupDFO (int _populationSize, int _iterations, std::vector<float> _targetVector, float _lowerBounds, float _upperBounds);
     
-    void initializeFlies(std::vector <std::vector <float>> &population);
-    void checkFlies(std::vector <std::vector <float>> population);
-    void calculateFitness(std::vector <std::vector <float>> &population, std::vector <float> &fitness);
-    void findSolution(float disturbanceThreshold, std::vector <std::vector <float>> &population, std::vector <float> &fitness, std::vector <float> &bestResult);
+    void initializeFlies(std::vector <std::vector <float>> &population, int numParams, int popSize);
+    void checkFlies(std::vector <std::vector <float>> population, int numParams);
+    
+    void calculateFitness(std::vector <std::vector <float>> &totalFlyMFCC, std::vector <float>targetMFCC, std::vector <float> &fitness);
+    
+    int findSolution(float disturbanceThreshold, std::vector <std::vector <float>> &totalFlyMFCC, std::vector <float> targetMFCC, std::vector <float> &fitness, std::vector <float> &bestResult);
 
                   
 private:
-    //2d vector for fly population
-    //std::vector <std::vector <float>> population;
     
-    int populationSize;
+    
+    int popSize;
     int totalIterations;
-    std::vector <float> targetVector;
+    std::vector <float> targetMFCC;
     
     std::vector <float> fitness;
     

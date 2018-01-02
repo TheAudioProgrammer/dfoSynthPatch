@@ -49,55 +49,25 @@ public:
     double wave,sample,outputs[2], ifftVal;
     maxiMix mymix, mymix2;
     
-    
-    //synth stuff (Target)
-    int triggerT;
-    float freq1T;
-    float freq2T;
-    float modFreqT;
-    float modDepthT;
-    float filterFreqT;
-    float filterResT;
-    
-    //normalize synth ranges (Target)
-    float freq1NormalizedT;
-    float freq2NormalizedT;
-    float modFreqNormalizedT;
-    float modDepthNormalizedT;
-    float filterFreqNormalizedT;
-    float filterResNormalizedT;
-    
-    //synth stuff (Result)
-    int triggerR;
-    float freq1R;
-    float freq2R;
-    float modFreqR;
-    float modDepthR;
-    float filterFreqR;
-    float filterResR;
-    
-    //normalize synth ranges (Result)
-    float freq1NormalizedR;
-    float freq2NormalizedR;
-    float modFreqNormalizedR;
-    float modDepthNormalizedR;
-    float filterFreqNormalizedR;
-    float filterResNormalizedR;
-    
-    
-    
     //mfcc analyzer
     mfccAnalysis mfccAnalyzer;
     
     //synthesizer
-    synth mySynth;
+    synth mySynth, mySynth2;
+    int fittestTrigger;
+    int targetTrigger;
+    
+    std::vector <float> targetMFCC;
+    std::vector <float> flyMFCC;
+    std::vector <std::vector <float>> totalFlyMFCC;
     
     //DFO class
     DFO myDFO;
     
     //vectors and variables for DFO
-    std::vector <float> targetSound;
     std::vector <std::vector <float>> population;
+    std::vector <float> targetParams;
+    
     std::vector <float> fitness;
     std::vector <float> bestResult;
     int iterations;
@@ -105,13 +75,27 @@ public:
     int numParams;
     float thresh;
     
+    int fittestFly;
+    
+    float targetFreq1;
+    float targetFreq2;
+    float targetModFreq;
+    float targetModDepth;
+    float targetFilterFreq;
+    float targetFilterRes;
+    
+    float fittestFreq1;
+    float fittestFreq2;
+    float fittestModFreq;
+    float fittestModDepth;
+    float fittestFilterFreq;
+    float fittestFilterRes;
+    
     ofTrueTypeFont myfont;
     
     ofxOscSender sender;
     
-    //bool isAnalyzed;
-    
-    
-    
+    bool targetAnalyzed;
+    bool flyAnalyzed;
 };
 
