@@ -16,7 +16,7 @@ void mfccAnalysis::setupMFCC(int sampleRate, int fftSize)
     nAverages = 12;
     oct.setup(sampleRate, fftSize/2, nAverages);
     
-    mfccs = (double*) malloc(sizeof(double) * 13);
+    mfccs = (double*) malloc(sizeof(double) * 26);
     mfcc.setup(512, 42, 13, 20, 20000, sampleRate);
 }
 
@@ -51,17 +51,11 @@ void mfccAnalysis::analyzeMFCC (double inputWave, int fftSize, std::vector <floa
         
         //cout coefficients
         //cout << "\nMFCCS: ";
-        for(int i=0; i < 13; i++) {
+        for(int i=0; i < 26; i++) {
             
             targetMFCC.push_back(mfccs[i]);
             //cout << mfccs[i] << ",";
         }
-        
-        
-//        for (int i = 0; i < targetMFCC.size(); i++)
-//        {
-//            std::cout << endl << "Target " << targetMFCC[i] << std::endl;
-//        }
         
         
         //file is now analyzed, don't analyze again

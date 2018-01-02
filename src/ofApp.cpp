@@ -20,34 +20,19 @@ ofApp::~ofApp() {
 //--------------------------------------------------------------
 void ofApp::setup(){
     
-    sender.setup(HOST, PORT);
-    /* some standard setup stuff*/
+    std::cout << "PLEASE WAIT FOR BEST SOLUTION" << std::endl;
     
-    ofSetWindowShape(0, 0);
+    ofSetWindowShape(400, 400);
     
-    /* This is stuff you always need.*/
-    
-    sampleRate 			= 44100; /* Sampling Rate */
-    initialBufferSize	= 512;	/* Buffer Size. you have to fill this buffer with sound*/
-    lAudioOut			= new float[initialBufferSize];/* outputs */
-    rAudioOut			= new float[initialBufferSize];
-    lAudioIn			= new float[initialBufferSize];/* inputs */
-    rAudioIn			= new float[initialBufferSize];
-    
-    
-    /* This is a nice safe piece of code */
-    memset(lAudioOut, 0, initialBufferSize * sizeof(float));
-    memset(rAudioOut, 0, initialBufferSize * sizeof(float));
-    
-    memset(lAudioIn, 0, initialBufferSize * sizeof(float));
-    memset(rAudioIn, 0, initialBufferSize * sizeof(float));
+    sampleRate 			= 44100;
+    initialBufferSize	= 512;
     
     //variable initialization
     fftSize = 1024;
-    iterations = 50;
-    popSize = 15;
+    iterations = 1000;
+    popSize = 100;
     numParams = 6;
-    thresh = 0.8f;
+    thresh = 0.2f;
     targetTrigger = 0;
     fittestTrigger = 0;
     targetAnalyzed = false;
@@ -55,8 +40,8 @@ void ofApp::setup(){
     //setup MFCC
     mfccAnalyzer.setupMFCC(sampleRate, fftSize);
     
-    ofxMaxiSettings::setup(sampleRate, 2, initialBufferSize);
-    ofSoundStreamSetup(2,2, this, sampleRate, initialBufferSize, 4);/* Call this last ! */
+    //ofxMaxiSettings::setup(sampleRate, 2, initialBufferSize);
+    ofSoundStreamSetup(2,2, this, sampleRate, initialBufferSize, 4);
     
     //initialize target sound
     for (int i = 0; i < numParams; i++)
@@ -66,7 +51,6 @@ void ofApp::setup(){
     
     //get target MFCC we want to get to
     mySynth.getTargetMFCC(mySynth, mfccAnalyzer, fftSize, targetParams, targetMFCC);
-    
     
     //setup DFO
     myDFO.setupDFO(popSize, iterations, targetMFCC, 0.0, 1.0);
@@ -80,12 +64,8 @@ void ofApp::setup(){
     //get initial fly MFCCs
     mySynth.getFlyMFCC(mySynth, mfccAnalyzer, popSize, fftSize, population, totalFlyMFCC);
     
-    //calculate how far fly MFCC is from target MFCC
-    //myDFO.calculateFitness(totalFlyMFCC, targetMFCC, fitness);
-    
-    fittestFly = myDFO.findSolution(0.1, totalFlyMFCC, targetMFCC, fitness, bestResult);
-    //mySynth.checkTarget(targetMFCC);
-    
+    //run DFO and find best result
+    fittestFly = myDFO.findSolution(thresh, totalFlyMFCC, targetMFCC, fitness, bestResult);
     
     //re-map parameters from above to synth
     targetFreq1 = ofMap(targetParams[0], 0, 1, 100, 1000);
@@ -121,16 +101,12 @@ void ofApp::draw(){
 //--------------------------------------------------------------
 void ofApp::audioRequested 	(float * output, int bufferSize, int nChannels){
     
-    
-    
-    
     for (int i = 0; i < bufferSize; i++){
         
         double targetEnvOut = mySynth.playSynth(targetFreq1, targetFreq2, targetModFreq, targetModDepth, targetFilterFreq, targetFilterRes, targetTrigger);
         
         
         double fittestEnvOut = mySynth2.playSynth(fittestFreq1, fittestFreq2, fittestModFreq, fittestModDepth, fittestFilterFreq, fittestFilterRes, fittestTrigger);
-        
         
         if (targetTrigger == 1)
         {
@@ -144,8 +120,8 @@ void ofApp::audioRequested 	(float * output, int bufferSize, int nChannels){
         }
         
         //output to speakers
-        lAudioOut[i] = output[i*nChannels    ] = outputs[0];
-        rAudioOut[i] = output[i*nChannels + 1] = outputs[1];
+        output[i*nChannels    ] = outputs[0];
+        output[i*nChannels + 1] = outputs[1];
     }
 }
 
@@ -181,9 +157,6 @@ void ofApp::keyReleased(int key){
     {
         fittestTrigger = 0;
     }
-
-
-    
 }
 
 //--------------------------------------------------------------

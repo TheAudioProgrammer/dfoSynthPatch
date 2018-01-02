@@ -72,7 +72,7 @@ void synth::getTargetMFCC (synth mySynth, mfccAnalysis &mfccAnalyzer, int fftSiz
         //get mfcc analysis of synth patch
         mfccAnalyzer.analyzeMFCC(envOutTarget, fftSize, targetMFCC, targetAnalyzed);
     }
-    while (ofGetElapsedTimeMillis() < time + 1000);
+    while (ofGetElapsedTimeMillis() < time + 100);
 }
 
 //=============================================================================
@@ -118,7 +118,7 @@ void synth::getFlyMFCC (synth mySynth, mfccAnalysis &mfccAnalyzer, int popSize, 
             //get mfcc analysis of synth patch
             mfccAnalyzer.analyzeMFCC(envOutTarget, fftSize, flyMFCC, flyAnalyzed);
         }
-        while (ofGetElapsedTimeMillis() < time + 1000);
+        while (ofGetElapsedTimeMillis() < time + 100);
     
         //store the mfcc in a vector
         totalFlyMFCC.push_back(flyMFCC);

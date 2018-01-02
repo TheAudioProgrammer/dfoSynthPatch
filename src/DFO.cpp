@@ -90,68 +90,69 @@ int DFO::findSolution(float disturbanceThreshold, std::vector <std::vector <floa
         //find index of fly with best fitness (closest to ideal solution)
         auto result = std::min_element(std::begin(fitness), std::end(fitness));
         fittestInSwarm = (int)(result - fitness.begin());
-        
-        for (int i = 0; i < targetMFCC.size(); i++)
-        {
-            //std::cout << "Fittest fly in Swarm: " << fittestInSwarm << " Parameter: " << i << " " << totalFlyMFCC[fittestInSwarm][i] << std::endl;
-        }
+        std::cout << "Fittest fly in the swarm: for iteration " << iterations << ": " << fittestInSwarm << std::endl;
         
         for (int i = 0; i < fitness.size(); i++)
         {
-            int leftFly;
-            int rightFly;
+            //skip fittest in swarm
+            if (i != fittestInSwarm)
+            {
             
-            if (i == 0)
-            {
-                leftFly = (int)fitness.size() - 1;
-            }
-            else
-            {
-                //compare left and right fly and find more fit
-                leftFly = i - 1;
-            }
+                int leftFly;
+                int rightFly;
             
-            //if last fly, right fly is first fly
-            if (i == fitness.size() - 1)
-            {
-                rightFly = 0;
-            }
-            else
-            {
-                rightFly = i + 1;
-            }
-            
-            //find fittest neighbor
-            int bestNeighbor = 0;
-            
-            if (fitness[leftFly] < fitness[rightFly])
-            {
-                bestNeighbor = leftFly;
-            }
-            else if (fitness[leftFly] > fitness[rightFly])
-            {
-                bestNeighbor = rightFly;
-            }
-            
-            //random dice throw to sometimes redistribute fly
-            float threshold = ofRandom(0.0f, 1.0f);
-            
-            if (threshold < disturbanceThreshold)
-            {
-                for (int j = 0; j < targetMFCC.size(); j++)
+                if (i == 0)
                 {
-                    //randomly scatter fly
-                    float randNum = lowerBounds + ofRandom(0.0f, 1.0f) * (upperBounds - lowerBounds);
-                    
-                    totalFlyMFCC[i][j] = randNum;
+                    leftFly = (int)fitness.size() - 1;
                 }
-            }
-            else
-            {
-                for (int j = 0; j < targetMFCC.size(); j++)
+                else
                 {
-                    //update position
-                    totalFlyMFCC[i][j] = totalFlyMFCC[bestNeighbor][j] + ofRandom(0.0, 1.0) * (totalFlyMFCC[fittestInSwarm][j] - totalFlyMFCC[bestNeighbor][j]);
+                    //compare left and right fly and find more fit
+                    leftFly = i - 1;
+                }
+            
+                //if last fly, right fly is first fly
+                if (i == fitness.size() - 1)
+                {
+                    rightFly = 0;
+                }
+                else
+                {
+                    rightFly = i + 1;
+                }
+            
+                //find fittest neighbor
+                int bestNeighbor = 0;
+            
+                if (fitness[leftFly] < fitness[rightFly])
+                {
+                    bestNeighbor = leftFly;
+                }
+                else if (fitness[leftFly] > fitness[rightFly])
+                {
+                    bestNeighbor = rightFly;
+                }
+            
+                //random dice throw to sometimes redistribute fly
+                float threshold = ofRandom(0.0f, 1.0f);
+            
+                if (threshold < disturbanceThreshold)
+                {
+                    for (int j = 0; j < targetMFCC.size(); j++)
+                    {
+                        //randomly scatter fly
+                        float randNum = lowerBounds + ofRandom(0.0f, 1.0f) * (upperBounds - lowerBounds);
+                    
+                        totalFlyMFCC[i][j] = randNum;
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < targetMFCC.size(); j++)
+                    {
+                        //update position
+                        totalFlyMFCC[i][j] = totalFlyMFCC[bestNeighbor][j] + ofRandom(0.0, 1.0) * (totalFlyMFCC[fittestInSwarm][j] - totalFlyMFCC[bestNeighbor][j]);
+                    }
                 }
             }
         }
