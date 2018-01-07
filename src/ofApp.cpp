@@ -30,9 +30,9 @@ void ofApp::setup(){
     //variable initialization
     fftSize = 1024;
     iterations = 1000;
-    popSize = 100;
+    popSize = 1000;
     numParams = 6;
-    thresh = 0.2f;
+    thresh = 0.1f;
     targetTrigger = 0;
     fittestTrigger = 0;
     targetAnalyzed = false;
@@ -81,6 +81,11 @@ void ofApp::setup(){
     fittestModDepth = ofMap(population[fittestFly][3], 0, 1, 100, 1000);
     fittestFilterFreq = ofMap(population[fittestFly][4], 0, 1, 100, 500);
     fittestFilterRes = ofMap(population[fittestFly][5], 0, 1, 0.0, 1.0);
+    
+    
+    //mySynth.checkTarget(targetMFCC);
+    
+    
     
     std::cout << "READY TO PLAY" << std::endl;
 }

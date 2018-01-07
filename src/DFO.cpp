@@ -90,7 +90,7 @@ int DFO::findSolution(float disturbanceThreshold, std::vector <std::vector <floa
         //find index of fly with best fitness (closest to ideal solution)
         auto result = std::min_element(std::begin(fitness), std::end(fitness));
         fittestInSwarm = (int)(result - fitness.begin());
-        std::cout << "Fittest fly in the swarm: for iteration " << iterations << ": " << fittestInSwarm << std::endl;
+        std::cout << "Fittest fly in the swarm: for iteration " << iterations << ": " << fittestInSwarm << " with fitness: " << *result << std::endl;
         
         for (int i = 0; i < fitness.size(); i++)
         {
@@ -140,6 +140,7 @@ int DFO::findSolution(float disturbanceThreshold, std::vector <std::vector <floa
                 {
                     for (int j = 0; j < targetMFCC.size(); j++)
                     {
+                        //std::cout << "threshold: " << i << std::endl;
                         //randomly scatter fly
                         float randNum = lowerBounds + ofRandom(0.0f, 1.0f) * (upperBounds - lowerBounds);
                     
@@ -160,6 +161,7 @@ int DFO::findSolution(float disturbanceThreshold, std::vector <std::vector <floa
     for (int i = 0; i < targetMFCC.size(); i++)
     {
         bestResult.push_back(totalFlyMFCC[fittestInSwarm][i]);
+        //std::cout << "Fittest Fly in Swarm: " << fittestInSwarm << std::endl;
     }
     return fittestInSwarm;
 }
